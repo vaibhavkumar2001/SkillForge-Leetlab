@@ -1,67 +1,16 @@
-import { db } from "../libs/db.js";
 
-export const getAllSubmission = async(req , res)=>{
-    try {
-        const userId = req.user.id;
-
-        const submissions = await db.submission.findMany({
-            where:{
-                userId:userId
-            }
-        })
-
-        res.status(200).json({
-            success:true,
-            message:"Submissions fetched successfully",
-            submissions
-        })
-        
-    } catch (error) {
-        console.error("Fetch Submissions Error:", error);
-        res.status(500).json({ error: "Failed to fetch submissions" });
-    }
-}
+import express from "express"
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import { getAllSubmission, getAllTheSubmissionsForProblem, getSubmissionsForProblem } from "../controllers/submission.controller.js";
 
 
-export const getSubmissionsForProblem = async (req , res)=>{
-    try {
-        const userId = req.user.id;
-        const problemId = req.params.problemId;
-        const submissions = await db.submission.findMany({
-            where:{
-                userId:userId,
-                problemId:problemId
-            }
-        })
-
-        res.status(200).json({
-            success:true,
-            message:"Submission fetched successfully",
-            submissions
-        })
-    } catch (error) {
-        console.error("Fetch Submissions Error:", error);
-        res.status(500).json({ error: "Failed to fetch submissions" });
-    }
-}
+const submissionRoutes = express.Router()
 
 
-export const getAllTheSubmissionsForProblem = async (req , res)=>{
-    try {
-        const problemId = req.params.problemId;
-        const submission = await db.submission.count({
-            where:{
-                problemId:problemId
-            }
-        })
+submissionRoutes.get("/get-all-submissions" , authMiddleware , getAllSubmission);
+submissionRoutes.get("/get-submission/:problemId" , authMiddleware , getSubmissionsForProblem)
 
-        res.status(200).json({
-            success:true,
-            message:"Submissions Fetched successfully",
-            count:submission
-        })
-    } catch (error) {
-        console.error("Fetch Submissions Error:", error);
-        res.status(500).json({ error: "Failed to fetch submissions" });
-    }
-}
+submissionRoutes.get("/get-submissions-count/:problemId" , authMiddleware , getAllTheSubmissionsForProblem)
+
+
+export default submissionRoutes;
